@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
@@ -147,10 +148,39 @@ public class Main {
         System.out.println("\nStarting simulation in 3 seconds...");
         Thread.sleep(3000);
 
+        // ========== TASK 1: LOAD MANEUVER SCRIPT FROM FILE ==========
+        // Parse command line for script file
+        String scriptFile = params.get("script");
+        ManeuverScript maneuverScript = null;
+        
+        try {
+            if (scriptFile != null) {
+                // Use the provided script file
+                maneuverScript = new ManeuverScript(scriptFile);
+                System.out.println("Loaded maneuvers from: " + scriptFile);
+            } else {
+                // Try to load default_maneuvers.csv from current directory
+                File defaultScript = new File("default_maneuvers.csv");
+                if (defaultScript.exists()) {
+                    maneuverScript = new ManeuverScript("default_maneuvers.csv");
+                    System.out.println("Loaded default maneuvers from: default_maneuvers.csv");
+                } else {
+                    System.err.println("Error: No --script flag provided and default_maneuvers.csv not found");
+                    System.err.println("Usage: java Main --script <filename.csv>");
+                    System.err.println("Or place default_maneuvers.csv in the current directory");
+                    System.exit(1);
+                }
+            }
+        } catch (RuntimeException e) {
+            System.err.println("Failed to load maneuver script: " + e.getMessage());
+            System.exit(1);
+        }
+        // ========== END TASK 1 CODE ==========
+
         // Create and start threads
         Thread userInputThread = createInputThread(rollControl, pitchControl, yawControl, turbulenceEnabled, running);
         Thread turbulenceThread = createTurbulenceThread(rollControl, pitchControl, yawControl, turbulenceEnabled, running);
-        Thread automatedDemoThread = createAutomatedDemoThread(rollControl, pitchControl, yawControl);
+        Thread automatedDemoThread = createAutomatedDemoThread(rollControl, pitchControl, yawControl, maneuverScript);
 
         userInputThread.start();
         turbulenceThread.start();
@@ -328,84 +358,52 @@ public class Main {
 
     /**
      * Creates a thread that automatically demonstrates various flight maneuvers
-     * without requiring user input - using ultra-gentle transitions
+     * driven by a ManeuverScript (reads CSV and loops).
+     * Task 1: This now reads maneuvers from a CSV file instead of hardcoded values.
      */
-    private static Thread createAutomatedDemoThread(DirectionControl roll, DirectionControl pitch, DirectionControl yaw) {
+    private static Thread createAutomatedDemoThread(DirectionControl roll, DirectionControl pitch, DirectionControl yaw,
+                                                    ManeuverScript maneuverScript) {
         return new Thread(() -> {
             try {
                 // Allow time for the simulation to start
-                Thread.sleep(3000); // Longer initial delay
-                System.out.println("\nStarting automated flight demonstration with ultra-gentle maneuvers...");
+                Thread.sleep(3000);
+                System.out.println("\nStarting automated flight demonstration from maneuver script...");
                 
-                // Start with extended stable level flight
-                roll.setTargetValue(0);
-                pitch.setTargetValue(0);
-                yaw.setTargetValue(0);
-                Thread.sleep(8000);  // 8 seconds of stable flight
+                // Get all maneuvers from the script
+                List<ManeuverScript.Maneuver> maneuvers = maneuverScript.getManeuvers();
+                if (maneuvers.isEmpty()) {
+                    System.err.println("Error: No maneuvers loaded from script");
+                    return;
+                }
                 
+                System.out.println("Loaded " + maneuvers.size() + " maneuvers. Looping indefinitely...\n");
+                
+                int index = 0;
                 while (true) {
-                    // Stage 1: Level flight
-                    System.out.println("\nDemonstrating: Level flight");
-                    roll.setTargetValue(0);
-                    pitch.setTargetValue(0);
-                    yaw.setTargetValue(0);
-                    Thread.sleep(8000); // Long stable period
+                    ManeuverScript.Maneuver m = maneuvers.get(index);
                     
-                    // Stage 2: Ultra-gentle right turn (minimal values)
-                    System.out.println("\nDemonstrating: Ultra-gentle right turn");
-                    roll.setTargetValue(2);  // Extremely gentle bank angle (was 5)
-                    pitch.setTargetValue(0); // No pitch
-                    yaw.setTargetValue(2);   // Minimal yaw (was 5)
-                    Thread.sleep(12000);     // Extended hold for observation
+                    // Set the target values
+                    roll.setTargetValue(m.roll());
+                    pitch.setTargetValue(m.pitch());
+                    yaw.setTargetValue(m.yaw());
                     
-                    // Back to level
-                    roll.setTargetValue(0);
-                    pitch.setTargetValue(0);
-                    yaw.setTargetValue(0);
-                    Thread.sleep(8000);
+                    // Print current maneuver info
+                    System.out.printf("Maneuver %d/%d: %.0f sec | Roll: %5.1f° | Pitch: %5.1f° | Yaw: %5.1f°%n",
+                        index + 1, maneuvers.size(), m.seconds(), m.roll(), m.pitch(), m.yaw());
                     
-                    // Stage 3: Ultra-gentle left turn
-                    System.out.println("\nDemonstrating: Ultra-gentle left turn");
-                    roll.setTargetValue(-2); // Extremely gentle bank angle (was -5)
-                    pitch.setTargetValue(0); // No pitch
-                    yaw.setTargetValue(-2);  // Minimal yaw (was -5)
-                    Thread.sleep(12000);     // Extended hold for observation
+                    // Wait for the duration of this maneuver
+                    Thread.sleep((long)(m.seconds() * 1000));
                     
-                    // Back to level
-                    roll.setTargetValue(0);
-                    pitch.setTargetValue(0);
-                    yaw.setTargetValue(0);
-                    Thread.sleep(8000);
-                    
-                    // Stage 4: Very gentle climb
-                    System.out.println("\nDemonstrating: Very gentle climb");
-                    roll.setTargetValue(0);
-                    pitch.setTargetValue(-5); // Minimal pitch up
-                    yaw.setTargetValue(0);
-                    Thread.sleep(10000);      // Hold for observation
-                    
-                    // Back to level
-                    roll.setTargetValue(0);
-                    pitch.setTargetValue(0);
-                    yaw.setTargetValue(0);
-                    Thread.sleep(8000);
-                    
-                    // Stage 5: Very gentle descent
-                    System.out.println("\nDemonstrating: Very gentle descent");
-                    roll.setTargetValue(0);
-                    pitch.setTargetValue(3);  // Minimal pitch down
-                    yaw.setTargetValue(0);
-                    Thread.sleep(10000);      // Hold for observation
-                    
-                    // Return to level for a long time
-                    System.out.println("\nReturning to level flight");
-                    roll.setTargetValue(0);
-                    pitch.setTargetValue(0);
-                    yaw.setTargetValue(0);
-                    Thread.sleep(10000);      // Long stable period
-                } 
+                    // Move to next maneuver, loop back to start at end
+                    index++;
+                    if (index >= maneuvers.size()) {
+                        index = 0;
+                        System.out.println("\n--- Looping back to start of maneuver script ---\n");
+                    }
+                }
             } catch (InterruptedException e) {
                 System.out.println("Demo thread interrupted.");
+                Thread.currentThread().interrupt();
             }
         });
     }
