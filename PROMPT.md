@@ -55,3 +55,33 @@ Copilot provided a complete modified Main.java. The createAutomatedDemoThread me
 - Added error handling with System.err and System.exit(1)
 - Replaced hardcoded demo thread with script-driven version
 - Simplified the loop to use sequential index with reset to 0 at end
+
+# ============================================
+# PERSON 2 - TASK 2 (Observer Pattern)
+# ============================================
+
+## Session 1 - 2026-06-02 14:30
+**Task:** Task 2 (Observer pattern)
+**Tool:** GitHub Copilot Chat
+**Prompt:**
+> Implement Observer pattern in DirectionControl. Add CopyOnWriteArrayList for listeners, addListener/removeListener methods, and notify listeners in update() after value changes. Also create DirectionControlListener interface.
+
+**Suggestion summary:**
+Copilot generated the interface and all required code for DirectionControl with proper thread-safe notification.
+
+**Decision:** Accepted with modifications
+**Why:** Added println statements for debugging output.
+
+---
+
+## Session 2 - 2026-06-02 15:00
+**Task:** Task 2 (Observer pattern - GUI)
+**Tool:** GitHub Copilot Chat
+**Prompt:**
+> Replace polling in AircraftGUI with observer pattern. Add volatile fields, register listeners in constructor, use volatile fields in Swing timer. Include thread-safety comment.
+
+**Suggestion summary:**
+Copilot provided complete code changes for AircraftGUI including volatile fields, listener registration, and timer modification.
+
+**Decision:** Accepted as written
+**Why:** Correct implementation with required thread-safety comment.
