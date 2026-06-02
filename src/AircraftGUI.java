@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.swing.Timer;
 
 /**
  * Professional aircraft simulation controller with multithreaded architecture.
@@ -139,6 +138,10 @@ public class AircraftGUI {
     // Fonts for text displays
     private Font mediumFont = new Font("Arial", Font.BOLD, 16);
 
+    private volatile double lastRoll = 0.0;
+    private volatile double lastPitch = 0.0;
+    private volatile double lastYaw = 0.0;
+
     /**
      * Creates the GUI bound to the simulation's three orientation controls.
      * Roll/pitch/yaw shown on screen are read from these instances each frame.
@@ -149,6 +152,13 @@ public class AircraftGUI {
         this.rollControl = rollControl;
         this.pitchControl = pitchControl;
         this.yawControl = yawControl;
+
+        rollControl.addListener(c -> this.lastRoll = c.getCurrentValue());
+        pitchControl.addListener(c -> this.lastPitch = c.getCurrentValue());
+        yawControl.addListener(c -> this.lastYaw = c.getCurrentValue());
+        
+        System.out.println("[Observer] Pattern active: GUI listening to DirectionControl events");
+        System.out.println("[Observer] Roll, Pitch, Yaw will now be pushed to GUI instead of polled");
     }
 
     public void setResourceMonitor(ResourceMonitor monitor) {
@@ -298,12 +308,10 @@ public class AircraftGUI {
             
             // Update panel with our current state
             if (panel != null) {
-                // These calls update the AircraftPanel's state for rendering
                 synchronized (aircraftLock) {
-                    // Update individual aircraft parameters
-                    panel.setRoll(roll);
-                    panel.setPitch(pitch);
-                    panel.setYaw(yaw);
+                    panel.setRoll(lastRoll);//CHANGED FROM 'roll' TO 'lastRoll'
+                    panel.setPitch(lastPitch);//CHANGED FROM 'pitch' TO 'lastPitch'
+                    panel.setYaw(lastYaw);// CHANGED FROM 'yaw' TO 'lastYaw'
                     panel.setFlightSpeed(flightSpeed);
                     panel.setAltitude(currentAltitude);
                     panel.setTurbulenceFactor(turbulenceFactor);
