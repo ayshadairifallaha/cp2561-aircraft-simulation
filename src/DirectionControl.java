@@ -7,6 +7,7 @@
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Direction control system for an aircraft axis. Manages a current value and a
@@ -24,6 +25,7 @@ public class DirectionControl {
     private double dampening;
     private double tolerance;
     private double maxStep;
+    private final CopyOnWriteArrayList<DirectionControlListener> listeners = new CopyOnWriteArrayList<>();
 
     // Statistics tracking
     private double totalDeviation = 0;
@@ -43,6 +45,7 @@ public class DirectionControl {
     protected void setDampening(double dampening) { this.dampening = dampening; }
     protected void setTolerance(double tolerance) { this.tolerance = tolerance; }
 
+
     public DirectionControl(String name, double min, double max, ConfigLoader config) {
         this.name = name;
         this.min = min;
@@ -57,6 +60,17 @@ public class DirectionControl {
         this.currentValue = 0;
         this.targetValue = 0;
         this.velocity = 0;
+    }
+
+    public void addListener(DirectionControlListener listener) {
+        if (listener != null) {
+            listeners.add(listener);
+            System.out.println("[Observer] Listener added to " + name + " control. Total: " + listeners.size());
+        }
+    }
+    public void removeListener(DirectionControlListener listener) {
+        listeners.remove(listener);
+        System.out.println("[Observer] Listener removed from " + name + " control. Total: " + listeners.size());
     }
 
     /**
@@ -85,14 +99,25 @@ public class DirectionControl {
         if (velocity > maxStep) velocity = maxStep;
         if (velocity < -maxStep) velocity = -maxStep;
 
-        currentValue += velocity;
+        double newValue = currentValue + velocity;
 
-        if (currentValue < min) {
-            currentValue = min;
+        // Apply bounds checking
+        if (newValue < min) {
+            newValue = min;
             velocity = 0;
-        } else if (currentValue > max) {
-            currentValue = max;
+        } else if (newValue > max) {
+            newValue = max;
             velocity = 0;
+        }
+        currentValue = newValue;
+
+        for (DirectionControlListener listener : listeners) {
+            try {
+                listener.onDirectionChanged(this);
+            } catch (Exception e) {
+                System.err.println("[Observer] Error notifying listener for " + name + ": " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 
