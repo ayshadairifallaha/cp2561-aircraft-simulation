@@ -1,0 +1,7 @@
+﻿seconds,roll,pitch,yaw
+8,0,0,0
+# This is a comment line - should be ignored by the parser
+12,2,0
+8,abc,0,0
+12,-200,0,-2
+10,0,100,0
