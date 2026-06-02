@@ -60,7 +60,7 @@ Copilot provided a complete modified Main.java. The createAutomatedDemoThread me
 # PERSON 2 - TASK 2 (Observer Pattern)
 # ============================================
 
-## Session 1 - 2026-06-02 14:30
+## Session 1 - 2026-06-02 10:30 AM 
 **Task:** Task 2 (Observer pattern)
 **Tool:** GitHub Copilot Chat
 **Prompt:**
@@ -74,7 +74,7 @@ Copilot generated the interface and all required code for DirectionControl with 
 
 ---
 
-## Session 2 - 2026-06-02 15:00
+## Session 2 - 2026-06-02 11:00 AM
 **Task:** Task 2 (Observer pattern - GUI)
 **Tool:** GitHub Copilot Chat
 **Prompt:**
