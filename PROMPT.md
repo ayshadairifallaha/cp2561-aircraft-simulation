@@ -1,3 +1,7 @@
+# ============================================
+# PERSON 1 (Aysha) - TASK 1 
+# ============================================
+
 ## Session 1 - 2026-06-01, 2:15 PM
 **Task:** Task 1 - Create ManeuverScript class
 **Tool:** GitHub Copilot Chat
@@ -57,7 +61,7 @@ Copilot provided a complete modified Main.java. The createAutomatedDemoThread me
 - Simplified the loop to use sequential index with reset to 0 at end
 
 # ============================================
-# PERSON 2 - TASK 2 (Observer Pattern)
+# PERSON 2 (Tim) - TASK 2 (Observer Pattern)
 # ============================================
 
 ## Session 1 - 2026-06-02 10:30 AM 
