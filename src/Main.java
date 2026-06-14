@@ -37,17 +37,25 @@ public class Main {
      * Helper method to parse command line arguments
      */
     private static Map<String, String> parseArgs(String[] args) {
-        Map<String, String> argMap = new HashMap<>();
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].startsWith("--") && i + 1 < args.length) {
+    Map<String, String> argMap = new HashMap<>();
+    for (int i = 0; i < args.length; i++) {
+        if (args[i].startsWith("--")) {
+            // Check if next argument exists and is not another flag
+            if (i + 1 < args.length && !args[i + 1].startsWith("--")) {
+                // Argument with value: --key value
                 String key = args[i].substring(2);
                 String value = args[i + 1];
                 argMap.put(key, value);
-                i++;  // Skip the value in next iteration
+                i++; // Skip the value
+            } else {
+                // Flag without value: --flag
+                String key = args[i].substring(2);
+                argMap.put(key, "true");
             }
         }
-        return argMap;
     }
+    return argMap;
+}
 
     /**
      * Logs a message to the log file.
