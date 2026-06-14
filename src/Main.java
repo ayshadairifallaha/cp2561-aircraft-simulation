@@ -378,15 +378,13 @@ public class Main {
      * driven by a ManeuverScript (reads CSV and loops).
      * Task 1: This now reads maneuvers from a CSV file instead of hardcoded values.
      */
-    private static Thread createAutomatedDemoThread(DirectionControl roll, DirectionControl pitch, DirectionControl yaw,
-                                                    ManeuverScript maneuverScript) {
-        return new Thread(() -> {
+    private static Runnable createAutomatedDemoTask(DirectionControl roll, DirectionControl pitch, DirectionControl yaw,
+                                                     ManeuverScript maneuverScript, AtomicBoolean running) {
+        return () -> {
             try {
-                // Allow time for the simulation to start
                 Thread.sleep(3000);
                 System.out.println("\nStarting automated flight demonstration from maneuver script...");
                 
-                // Get all maneuvers from the script
                 List<ManeuverScript.Maneuver> maneuvers = maneuverScript.getManeuvers();
                 if (maneuvers.isEmpty()) {
                     System.err.println("Error: No maneuvers loaded from script");
@@ -396,22 +394,18 @@ public class Main {
                 System.out.println("Loaded " + maneuvers.size() + " maneuvers. Looping indefinitely...\n");
                 
                 int index = 0;
-                while (true) {
+                while (running.get()) {
                     ManeuverScript.Maneuver m = maneuvers.get(index);
                     
-                    // Set the target values
                     roll.setTargetValue(m.roll());
                     pitch.setTargetValue(m.pitch());
                     yaw.setTargetValue(m.yaw());
                     
-                    // Print current maneuver info
                     System.out.printf("Maneuver %d/%d: %.0f sec | Roll: %5.1f° | Pitch: %5.1f° | Yaw: %5.1f°%n",
                         index + 1, maneuvers.size(), m.seconds(), m.roll(), m.pitch(), m.yaw());
                     
-                    // Wait for the duration of this maneuver
                     Thread.sleep((long)(m.seconds() * 1000));
                     
-                    // Move to next maneuver, loop back to start at end
                     index++;
                     if (index >= maneuvers.size()) {
                         index = 0;
@@ -422,6 +416,6 @@ public class Main {
                 System.out.println("Demo thread interrupted.");
                 Thread.currentThread().interrupt();
             }
-        });
+        };
     }
 }
