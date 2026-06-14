@@ -32,7 +32,7 @@ public class Main {
     private static DirectionControl rollControl;
     private static DirectionControl pitchControl;
     private static DirectionControl yawControl;
-
+    private static boolean injectFailures = false;
     /**
      * Helper method to parse command line arguments
      */
