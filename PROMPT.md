@@ -112,11 +112,21 @@ Copilot generated a complete SupervisedRunner class that uses a Deque to track f
 # PERSON 2 (Tim) - TASK 3 (Editing Main.java)
 # ============================================
 
-## Session 4 - 2026-06-14 5:00PM
+## Session 3 - 2026-06-14 5:00PM
 **Task:** Task 3 - Editing Main.java
 **Tool:** GitHub Copilot Chat
 **Prompt:**
 > check if the map contains the key "inject-failures". Set the injectFailures variable to true if present. Print a warning message
+
+**Decision:** Accepted 
+
+**File edited:** src/Main.java
+
+## Session 3 - 2026-06-14 5:45PM
+**Task:** Task 3 - Editing Main.java
+**Tool:** GitHub Copilot Chat
+**Prompt:**
+> replace the createTurbulenceThread method in Main.java with a new method called createTurbulenceTask that returns runnable instead of thread. add failure injection logic. throw a RuntimeException at 3 6 and 9 seconds.
 
 **Decision:** Accepted 
 

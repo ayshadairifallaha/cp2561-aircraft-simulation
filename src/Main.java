@@ -333,33 +333,44 @@ public class Main {
     /**
      * Creates a thread that applies turbulence to the aircraft
      */
-    private static Thread createTurbulenceThread(DirectionControl roll, DirectionControl pitch, DirectionControl yaw,
-                                         AtomicBoolean turbulenceEnabled, AtomicBoolean running) {
-        return new Thread(() -> {
+    private static Runnable createTurbulenceTask(DirectionControl roll, DirectionControl pitch, DirectionControl yaw,
+                                                  AtomicBoolean turbulenceEnabled, AtomicBoolean running,
+                                                  boolean injectFailures) {
+        return () -> {
             Random random = new Random();
+            long startTime = System.currentTimeMillis();
+            System.out.println("Turbulence thread started" + (injectFailures ? " (failure injection active)" : ""));
 
             while (running.get()) {
                 try {
-                    // Only apply turbulence if enabled
+                    // Inject failures if flag is set
+                    if (injectFailures) {
+                        long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
+                        if (elapsedSeconds == 3 || elapsedSeconds == 6 || elapsedSeconds == 9) {
+                            throw new RuntimeException("💥 INJECTED FAILURE at " + elapsedSeconds + " seconds - testing self-healing!");
+                        }
+                    }
+                    
+                    // Apply turbulence if enabled
                     if (turbulenceEnabled.get()) {
-                        // Create random jitter values to simulate turbulence
                         double rollJitter = (random.nextDouble() - 0.5) * 2.0;
                         double pitchJitter = (random.nextDouble() - 0.5) * 1.5;
                         double yawJitter = (random.nextDouble() - 0.5) * 1.0;
-
-                        // Apply jitter
+                        
                         roll.setCurrentValue(roll.getCurrentValue() + rollJitter);
                         pitch.setCurrentValue(pitch.getCurrentValue() + pitchJitter);
                         yaw.setCurrentValue(yaw.getCurrentValue() + yawJitter);
                     }
-
+                    
                     Thread.sleep(200);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
                 }
             }
-        });
+            
+            System.out.println("Turbulence thread exited");
+        };
     }
 
     /**
