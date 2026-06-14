@@ -184,13 +184,20 @@ public class Main {
         // ========== END TASK 1 CODE ==========
 
         // Create and start threads
-        Thread userInputThread = createInputThread(rollControl, pitchControl, yawControl, turbulenceEnabled, running);
-        Thread turbulenceThread = createTurbulenceThread(rollControl, pitchControl, yawControl, turbulenceEnabled, running);
-        Thread automatedDemoThread = createAutomatedDemoThread(rollControl, pitchControl, yawControl, maneuverScript);
+        Runnable turbulenceTask = createTurbulenceTask(rollControl, pitchControl, yawControl, turbulenceEnabled, running, injectFailures);
+        SupervisedRunner supervisedTurbulence = new SupervisedRunner("turbulence", turbulenceTask, running);
+        Thread supervisedTurbulenceThread = new Thread(supervisedTurbulence);
+        supervisedTurbulenceThread.start();
 
+        // Wrap automated demo thread
+        Runnable demoTask = createAutomatedDemoTask(rollControl, pitchControl, yawControl, maneuverScript, running);
+        SupervisedRunner supervisedDemo = new SupervisedRunner("automated-demo", demoTask, running);
+        Thread supervisedDemoThread = new Thread(supervisedDemo);
+        supervisedDemoThread.start();
+
+        // User input thread does NOT need supervision (short-lived)
+        Thread userInputThread = createInputThread(rollControl, pitchControl, yawControl, turbulenceEnabled, running);
         userInputThread.start();
-        turbulenceThread.start();
-        automatedDemoThread.start();
 
         // Create and start the Swing GUI. The GUI reads orientation directly
         // from the DirectionControl instances passed in - no JSON intermediary.
@@ -201,8 +208,17 @@ public class Main {
         // tells the GUI to throttle its frame rate when the host is under load.
         ResourceMonitor resourceMonitor = new ResourceMonitor(1000, gui::setPerformanceLevel);
         gui.setResourceMonitor(resourceMonitor);
-        Thread resourceMonitorThread = resourceMonitor.start();
-
+        Runnable monitorTask = () -> {
+            Thread t = resourceMonitor.start();
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        };
+        SupervisedRunner supervisedMonitor = new SupervisedRunner("resource-monitor", monitorTask, running);
+        Thread supervisedMonitorThread = new Thread(supervisedMonitor);
+        supervisedMonitorThread.start();
         gui.show();
         
         // Create and start thread to update the GUI
@@ -246,34 +262,34 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            // Stop the resource monitor first - it's a daemon thread but we
-            // ask it to exit cleanly before tearing down everything else.
-            resourceMonitor.stop();
-            resourceMonitorThread.interrupt();
+    // Stop the resource monitor first
+    resourceMonitor.stop();
+    // resourceMonitorThread is now supervisedMonitorThread
+    supervisedMonitorThread.interrupt();
 
-            // Interrupt the GUI update thread
-            guiUpdateThread.interrupt();
+    // Interrupt the GUI update thread
+    guiUpdateThread.interrupt();
 
-            // Show cursor again when exiting
-            if (PlatformSupport.supportsAnsi()) {
-                System.out.print("\033[?25h"); // Show cursor
-            }
+    // Show cursor again when exiting
+    if (PlatformSupport.supportsAnsi()) {
+        System.out.print("\033[?25h"); // Show cursor
+    }
 
-            // Close log writers if open
-            if (logWriter != null) {
-                logWriter.close();
-            }
-            if (csvLogWriter != null) {
-                csvLogWriter.close();
-            }
+    // Close log writers if open
+    if (logWriter != null) {
+        logWriter.close();
+    }
+    if (csvLogWriter != null) {
+        csvLogWriter.close();
+    }
 
-            // Interrupt other threads
-            userInputThread.interrupt();
-            turbulenceThread.interrupt();
-            automatedDemoThread.interrupt();
+    // Interrupt supervised threads
+    userInputThread.interrupt();
+    supervisedTurbulenceThread.interrupt();
+    supervisedDemoThread.interrupt();
 
-            System.out.println("\nSimulation terminated. Thank you for flying with us!");
-        }
+    System.out.println("\nSimulation terminated. Thank you for flying with us!");
+}
 
 
         // Collect and display statistics

@@ -132,11 +132,21 @@ Copilot generated a complete SupervisedRunner class that uses a Deque to track f
 
 **File edited:** src/Main.java
 
-## Session 3 - 2026-06-14 5:45PM
+## Session 3 - 2026-06-14 6:00PM
 **Task:** Task 3 - Editing Main.java
 **Tool:** GitHub Copilot Chat
 **Prompt:**
 > replace the createAutomatedDemoThread method in Main.java with a new method called createAutomatedDemoTask that returns runnable instead of thread. keep all the existing maneuver execution logic the same.
+
+**Decision:** Accepted 
+
+**File edited:** src/Main.java
+
+## Session 3 - 2026-06-14 6:30PM
+**Task:** Task 3 - Editing Main.java
+**Tool:** GitHub Copilot Chat
+**Prompt:**
+> in Main.java main method, replace existing thread creation code. wrap turbulence, demo, and resource monitor threads with SupervisedRunner. update finally block with new thread variables
 
 **Decision:** Accepted 
 
