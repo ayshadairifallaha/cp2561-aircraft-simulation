@@ -1,3 +1,7 @@
+# ============================================
+# PERSON 1 (Aysha) - TASK 1 
+# ============================================
+
 ## Session 1 - 2026-06-01, 2:15 PM
 **Task:** Task 1 - Create ManeuverScript class
 **Tool:** GitHub Copilot Chat
@@ -57,7 +61,7 @@ Copilot provided a complete modified Main.java. The createAutomatedDemoThread me
 - Simplified the loop to use sequential index with reset to 0 at end
 
 # ============================================
-# PERSON 2 - TASK 2 (Observer Pattern)
+# PERSON 2 (Tim) - TASK 2 (Observer Pattern)
 # ============================================
 
 ## Session 1 - 2026-06-02 10:30 AM 
@@ -85,3 +89,21 @@ Copilot provided complete code changes for AircraftGUI including volatile fields
 
 **Decision:** Accepted as written
 **Why:** Correct implementation with required thread-safety comment.
+
+# ============================================
+# PERSON 1 (Aysha) -  Task 3 - (Create SupervisedRunner class)
+# ============================================
+
+## Session 4 - 2026-06-09 10:46 AM
+**Task:** Task 3 - Create SupervisedRunner class
+**Tool:** GitHub Copilot Chat
+**Prompt:**
+> I need to create a SupervisedRunner class in Java for an aircraft simulation that makes worker threads self-healing. Requirements: 1. Implements Runnable, 2. Constructor takes workerName, workerTask, and AtomicBoolean runningFlag, 3. Exponential backoff from 100ms to 5 seconds (doubling), 4. Restart budget: 5 failures in 30 seconds = give up, 5. Reset backoff after 10 seconds of success, 6. Log failures with worker name and stack trace. The workerTask is an infinite loop, so track time since last failure for success detection.
+
+**Suggestion Summary:**
+Copilot generated a complete SupervisedRunner class that uses a Deque to track failure timestamps within the 30-second budget window, exponential backoff with Math.min(backoff * 2, maxBackoffMs), an AtomicReference to capture exceptions from the worker thread, and a monitor loop that checks for failures and tracks success window.
+
+**Decision:** Accepted with modifications
+**Why:** Added console println statements alongside the logger to ensure output is visible in the terminal. The core logic is correct and handles infinite worker loops properly.
+
+**File created:** src/SupervisedRunner.java
