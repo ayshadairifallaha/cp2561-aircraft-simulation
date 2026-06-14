@@ -90,6 +90,12 @@ public class Main {
         // Parse command line arguments
         Map<String, String> params = parseArgs(args);
 
+        injectFailures = params.containsKey("inject-failures");
+        if (injectFailures) {
+            System.out.println("--inject-failures mode active. Turbulence thread will crash at 3, 6, and 9 seconds.");
+        }
+
+
         // Apply the native Swing look-and-feel and announce the host OS.
         PlatformSupport.applySystemLookAndFeel();
         System.out.println("Detected OS: " + PlatformSupport.osLabel()

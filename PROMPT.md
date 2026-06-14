@@ -107,3 +107,17 @@ Copilot generated a complete SupervisedRunner class that uses a Deque to track f
 **Why:** Added console println statements alongside the logger to ensure output is visible in the terminal. The core logic is correct and handles infinite worker loops properly.
 
 **File created:** src/SupervisedRunner.java
+
+# ============================================
+# PERSON 2 (Tim) - TASK 3 (Editing Main.java)
+# ============================================
+
+## Session 4 - 2026-06-14 5:00PM
+**Task:** Task 3 - Editing Main.java
+**Tool:** GitHub Copilot Chat
+**Prompt:**
+> check if the map contains the key "inject-failures". Set the injectFailures variable to true if present. Print a warning message
+
+**Decision:** Accepted 
+
+**File edited:** src/Main.java
